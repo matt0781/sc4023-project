@@ -1,11 +1,12 @@
-#ifndef FUNCTIONS  // Guard
-#define FUNCTIONS  // Defi
+#ifndef FUNCTIONS 
+#define FUNCTIONS  
 
 // CONSTANTS
 
 #define MAX_NUM_RECORDS 300000
 #define TOTAL_NUM_RECORDS 222833
 #define RECORDS_PER_PARTITION 1000
+#define MAX_NUM_PARTITON 300
 
 // metadata - size of each attribute
 #define YEAR_SIZE sizeof(int)
@@ -84,6 +85,6 @@ int *filter_year(int (*search_lines)[2], int num_rows, int filter_val, int recor
 void save_buffer_to_binary_files(Buffer* buffer, int num_records);
 void create_metadata(Buffer *buffer, ColumnMetaData *columnMetaData, int num_records, int column_num);
 
-
-
+int* get_IO_partition_int(int partition_num, int record_size, char* column_name);
+int* get_indexes_filter_int(char* column_name, int* input_idx, int num_input_idx, int record_size, int filter_val);
 #endif  // End of include guard

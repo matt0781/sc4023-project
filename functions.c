@@ -353,3 +353,77 @@ int *filter_year(int (*search_lines)[2], int num_rows, int filter_val, int recor
     
     return result;
 }
+
+
+int* get_indexes_filter_int(char* column_name, int* input_idx, int num_input_idx, int record_size, int filter_val){
+    int last_partition_num = -1;
+    int partition_num = -1;
+    int count_input_idx = 0;
+
+    int *result = (int *)malloc(sizeof(int) * num_input_idx);
+    int count_result = 0;
+
+    
+    while (count_input_idx < num_input_idx){
+
+
+        int partition_num_required = input_idx[count_input_idx] / RECORDS_PER_PARTITION;
+        // if need to load a new partition
+        if (partition_num_required > last_partition_num){
+            last_partition_num = partition_num_required;
+
+            // load the partition (cost one I/O)
+            printf("getting partition num %d\n", partition_num_required);
+            int *arr = get_IO_partition_int(partition_num_required,  record_size, column_name);
+
+            // index number relative to a partition (0-999)
+            int local_index;
+
+
+            while ((count_input_idx < num_input_idx) && (input_idx[count_input_idx]/RECORDS_PER_PARTITION == partition_num_required)){
+                local_index = input_idx[count_input_idx] % RECORDS_PER_PARTITION;
+                if (arr[local_index] == filter_val){
+                    result[count_result] = input_idx[count_input_idx];
+                    count_result ++;
+                }
+                count_input_idx ++;
+            }
+        }
+        else {
+            count_input_idx ++;
+        }
+
+        
+    }
+    result[count_result] = -1;
+    return result;
+
+}
+
+
+
+int* get_IO_partition_int(int partition_num, int record_size, char* column_name){
+    char filename[100];
+    sprintf(filename, "./database/%s.bin", column_name);
+
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        printf("Error: Cannot open file %s\n", filename);
+        return NULL;
+    }
+
+    long startAddress = partition_num * RECORDS_PER_PARTITION * record_size;
+    fseek(file, startAddress, SEEK_SET);
+
+    int* res = (int*)malloc(RECORDS_PER_PARTITION*sizeof(int));
+
+    size_t items_read = fread(res, sizeof(int), RECORDS_PER_PARTITION , file);
+
+    fclose(file);
+    
+    // if (items_read != RECORDS_PER_PARTITION) {
+    //     printf("Warning: Only read %zu of %d items\n", items_read, RECORDS_PER_PARTITION);
+    // }
+
+    return res;
+}

@@ -12,26 +12,56 @@ int main(void) {
 
     ColumnMetaData columnsMetaData[11];
     storeColumnOrientedData(inputFile,total_num_records,columnsMetaData);
-    int lines[1][2] = {{0,MAX_NUM_RECORDS}};
+
     printf("\ndone part 1\n");
 
 
-    // filter for year
-    int year_record_size = columnsMetaData[0].record_size; // 4
-    int num_records_per_partition = columnsMetaData[0].num_records_per_partition; // 1000
 
-    int *year_lines =  filter_year(lines, 1, 2014, 4, 4*1000); //  return all indexs where year = 2014
-    int i = 0;
-    int line = 0;
-    printf("year filter result start_line = %d\n",  year_lines[i]);
-    while (year_lines[i]!=-1){
-        line = year_lines[i];
-        i++;
+    ////// filter for year
+
+    // define arguments
+    char* column_name = "year";
+    int lines[TOTAL_NUM_RECORDS];
+    int filter_val = 2015;
+    for (int i=0; i<TOTAL_NUM_RECORDS;i++){
+        lines[i] = i;
     }
-    printf("year filter result end_line = %d\n",  year_lines[i-1]);
+
+    // execute the filter
+    int* res_year = get_indexes_filter_int(column_name, lines, TOTAL_NUM_RECORDS, sizeof(int), filter_val);
+
+
+    // print result
+    int idx_res_year=0;
+    printf("start index year filter = %d\n", res_year[idx_res_year]);
+    while (res_year[idx_res_year] !=-1){
+        idx_res_year+=1;
+    }
+    printf("end index year filter = %d\n", res_year[idx_res_year-1]);
+
+
+
+    ////// filter for month
+
+    // define arguments
+    char* column_name2 = "month";
+    int filter_val_month = 7;
+   
+
+    // execute the filter
+    int* res_month = get_indexes_filter_int(column_name2, res_year, idx_res_year, sizeof(int), filter_val_month);
+
+
+    // print result
+    int idx_res_month=0;
+    printf("start index month filter = %d\n", res_month[idx_res_month]);
+    while (res_month[idx_res_month] !=-1){
+        idx_res_month+=1;
+    }
+    printf("end index month filter = %d\n", res_month[idx_res_month-1]);
     return 0;
 
 
-    // filter for month
+
 
 }
