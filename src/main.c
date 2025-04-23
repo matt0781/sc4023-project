@@ -27,7 +27,7 @@ int main(void) {
         printf("Processing result %d: %s\n", i, inputs[i]);
 
         // Get the lines by normal scanning, zone map, shared scan, zone map + shared scan
-        DynamicArrayInt* output_lines_ = filter_scan(NORMAL_SCAN, inputs[i], total_num_records);
+        DynamicArrayInt* output_lines_ = filter_scan(ZONE_MAP_SCAN, inputs[i], total_num_records, columnsMetaData);
         int* output_lines = output_lines_->array; // an array storing lines
         int output_size = output_lines_->size; // number of lines
 
@@ -47,7 +47,7 @@ int main(void) {
 
 
     // Compare time taken for different scan methods
-    calc_time_taken(inputs,  num_inputs, total_num_records);
+    calc_time_taken(inputs,  num_inputs, total_num_records, columnsMetaData);
 
 
     return 0;

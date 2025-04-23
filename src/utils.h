@@ -2,7 +2,7 @@
 #define UTILS_H
 
 #include "process.h"
-
+#include "functions.h"
 typedef struct  {
     int* array;
     int size;
@@ -15,6 +15,6 @@ typedef struct  {
 } DynamicArrayString;
 
 void write_res_to_csv(ResultStats** results, char** matric_nums, int num_inputs);
-void calc_time_taken(char** inputs, int num_inputs, int total_num_records);
+void calc_time_taken(char** inputs, int num_inputs, int total_num_records, ColumnMetaData* columnMetaData);
 # endif
 

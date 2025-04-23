@@ -59,12 +59,12 @@ void write_res_to_csv(ResultStats** results, char** matric_nums, int num_inputs)
     // Check if database directory exists, create if it doesn't
     #ifdef _WIN32
         // Windows
-        if (system("if not exist .\\ScanResults mkdir .\\database") != 0) {
+        if (system("if not exist .\\..\ScanResults mkdir .\\database") != 0) {
             printf("Failed to create ScanResults directory\n");
         }
     #else
         // Unix/Linux/macOS
-        if (system("mkdir -p ./ScanResults") != 0) {
+        if (system("mkdir -p ./../ScanResults") != 0) {
             printf("Failed to create ScanResults directory\n");
         }
     #endif
@@ -98,7 +98,7 @@ void write_res_to_csv(ResultStats** results, char** matric_nums, int num_inputs)
 }
 
 
-void calc_time_taken(char** inputs, int num_inputs, int total_num_records){
+void calc_time_taken(char** inputs, int num_inputs, int total_num_records, ColumnMetaData* columnMetaData){
     double** times = (double**)malloc(sizeof(double)*num_inputs);
     for (int i=0; i<num_inputs;i++){
         times[i] = (double*)calloc(4, sizeof(double));
@@ -119,10 +119,10 @@ void calc_time_taken(char** inputs, int num_inputs, int total_num_records){
             
             switch (currentScanType) {
                 case NORMAL_SCAN:
-                    output_lines_ = filter_scan(NORMAL_SCAN, inputs[i], total_num_records);
+                    output_lines_ = filter_scan(NORMAL_SCAN, inputs[i], total_num_records, columnMetaData);
                     break;
                 case ZONE_MAP_SCAN:
-                    //output_lines_ = filter_scan(ZONE_MAP_SCAN, inputs[i], total_num_records);  // Fixed scan type
+                    output_lines_ = filter_scan(ZONE_MAP_SCAN, inputs[i], total_num_records, columnMetaData);
                     break;
                 case SHARED_SCAN:
                     //output_lines_ = filter_scan(SHARED_SCAN, inputs[i], total_num_records);  // Fixed scan type
