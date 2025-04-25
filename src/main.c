@@ -16,8 +16,12 @@ int main(void) {
 
     ColumnMetaData* columnsMetaData = storeColumnOrientedData(inputFile,total_num_records);
 
+    // ====== MODIFY HERE to test with different Matric Number ==========
+    // === 1. Add your matric number into the set `inputs[9]`
+    // === 2. Update num_inputs to total number of Matric number in the set =====
     char *inputs[9] = {"U2223483D", "U2123083J", "U2122248G"};
     int num_inputs = 3;
+    // ====================================================================
 
     ResultStats** all_results = malloc(3 * sizeof(ResultStats*));
     Optimizer optimizers[4] = {NORMAL, ZONE_MAP, SHARED_SCAN, ZONE_MAP_SHARED_SCAN};
