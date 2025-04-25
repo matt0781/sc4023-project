@@ -59,7 +59,7 @@ void write_res_to_csv(ResultStats** results, char** matric_nums, int num_inputs)
     // Check if database directory exists, create if it doesn't
     #ifdef _WIN32
         // Windows
-        if (system("if not exist .\\..\\ScanResults mkdir .\\..\ScanResults") != 0) {
+        if (system("if not exist .\\..\\ScanResults mkdir .\\..\\ScanResults") != 0) {
             printf("Failed to create ScanResults directory\n");
         }
     #else
