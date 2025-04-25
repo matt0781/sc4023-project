@@ -11,7 +11,7 @@ int* get_IO_int(int partition_num, int record_size, char* column_name){
     char filename[100];
     sprintf(filename, "./../database/%s.bin", column_name);
 
-    FILE *file = fopen(filename, "r");
+    FILE *file = fopen(filename, "rb");
     if (!file) {
         printf("Error: Cannot open file %s\n", filename);
         return NULL;
