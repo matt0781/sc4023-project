@@ -1,7 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "process.h"
+#include "compute.h"
 #include "functions.h"
 typedef struct  {
     int* array;

@@ -40,17 +40,17 @@
 extern const int record_size_mapping[11];
 extern const int is_int_column[11];
 extern const char* column_name_mapping[11];
+extern const char* town_mapping[26];
 
-
-/* 4 types of scans */
+/* types of optimizer */
 typedef enum {
-    NORMAL_SCAN = 0,      // Normal scan
-    ZONE_MAP_SCAN = 1,    // Zone map scan
+    NORMAL = 0,      // Normal scan
+    ZONE_MAP = 1,    // Zone map scan
     SHARED_SCAN = 2,      // Shared scan
     ZONE_MAP_SHARED_SCAN = 3  // Zone map + shared scan
-} ScanType;
+} Optimizer;
 
 
 
-const char* town_mapping[26];
+
 #endif /* CONST_H */

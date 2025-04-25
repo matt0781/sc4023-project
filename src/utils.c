@@ -99,55 +99,88 @@ void write_res_to_csv(ResultStats** results, char** matric_nums, int num_inputs)
 
 
 void calc_time_taken(char** inputs, int num_inputs, int total_num_records, ColumnMetaData* columnMetaData){
-    double** times = (double**)malloc(sizeof(double)*num_inputs);
-    for (int i=0; i<num_inputs;i++){
-        times[i] = (double*)calloc(4, sizeof(double));
-    }
+    // Allocate a 3D array with shape (num_trials (100), num_inputs (3), num_metrics (4))
+    int num_trials = 100;
+    double*** times = (double***)malloc(num_trials * sizeof(double**));
+    for (int i = 0; i < 100; i++) {
+        times[i] = (double**)malloc(num_inputs * sizeof(double*));
+        for (int j = 0; j < num_inputs; j++) {
+            times[i][j] = (double*)calloc(4, sizeof(double));
+        }
+    }   
 
-    for (int i=0; i<num_inputs; i++){
+    int* resale_prices;
+    int* areas;
 
-        for (int j = 0; j < 4; j++) {  // Changed inner loop variable from i to j
-            ScanType currentScanType = (ScanType)j;
-            clock_t start, end;
-            double cpu_time_used;
-            
-            // Start timer
-            start = clock();
-            
-            // Process based on scan type
-            DynamicArrayInt* output_lines_;  // Declared only once outside the switch
-            
-            switch (currentScanType) {
-                case NORMAL_SCAN:
-                    output_lines_ = filter_scan(NORMAL_SCAN, inputs[i], total_num_records, columnMetaData);
-                    break;
-                case ZONE_MAP_SCAN:
-                    output_lines_ = filter_scan(ZONE_MAP_SCAN, inputs[i], total_num_records, columnMetaData);
-                    break;
-                case SHARED_SCAN:
-                    //output_lines_ = filter_scan(SHARED_SCAN, inputs[i], total_num_records);  // Fixed scan type
-                    break;
-                case ZONE_MAP_SHARED_SCAN:
-                    //output_lines_ = filter_scan(ZONE_MAP_SHARED_SCAN, inputs[i], total_num_records);  // Fixed scan type
-                    break;
+    for (int trial=0; trial < num_trials; trial++){
+        for (int i=0; i<num_inputs; i++){
+
+            for (int j = 0; j < 4; j++) {  // Changed inner loop variable from i to j
+                Optimizer currentScanType = (Optimizer)j;
+                clock_t start, end;
+                double cpu_time_used;
+                
+                // Start timer
+                start = clock();
+                
+                // Process based on scan type
+                DynamicArrayInt* output_lines_;  // Declared only once outside the switch
+                
+                switch (currentScanType) {
+                    case NORMAL:
+                        output_lines_ = filter_scan(NORMAL, inputs[i], total_num_records, columnMetaData);
+                        resale_prices = get_values_column("resale_price", output_lines_->array, output_lines_->size);
+                        areas = get_values_column("floor_area_sqm", output_lines_->array, output_lines_->size);
+                        compute_result(NORMAL, resale_prices, areas, output_lines_->size);
+                        break;
+                    case ZONE_MAP:
+                        output_lines_ = filter_scan(ZONE_MAP, inputs[i], total_num_records, columnMetaData);
+                        resale_prices = get_values_column("resale_price", output_lines_->array, output_lines_->size);
+                        areas = get_values_column("floor_area_sqm", output_lines_->array, output_lines_->size);
+                        compute_result(ZONE_MAP, resale_prices, areas, output_lines_->size);
+                        break;
+                    case SHARED_SCAN:
+                        output_lines_ = filter_scan(SHARED_SCAN, inputs[i], total_num_records, columnMetaData);
+                        resale_prices = get_values_column("resale_price", output_lines_->array, output_lines_->size);
+                        areas = get_values_column("floor_area_sqm", output_lines_->array, output_lines_->size);
+                        compute_result(SHARED_SCAN, resale_prices, areas, output_lines_->size);
+                        break;
+                    case ZONE_MAP_SHARED_SCAN:
+                        output_lines_ = filter_scan(ZONE_MAP_SHARED_SCAN, inputs[i], total_num_records, columnMetaData);
+                        resale_prices = get_values_column("resale_price", output_lines_->array, output_lines_->size);
+                        areas = get_values_column("floor_area_sqm", output_lines_->array, output_lines_->size);
+                        compute_result(ZONE_MAP_SHARED_SCAN, resale_prices, areas, output_lines_->size);
+                        break;
+                }
+                
+                // End timer
+                end = clock();
+                times[trial][i][j] = ((double) (end - start)) / CLOCKS_PER_SEC;
+                
             }
-            
-            // End timer
-            end = clock();
-            times[i][j] = ((double) (end - start)) / CLOCKS_PER_SEC;
-            
         }
     }
 
-
-    for(int j=0; j<4;j++){
-        double avg = 0.0;
-        for (int i=0; i<num_inputs;i++){
-            avg += times[i][j];
+        printf("\n");
+        for(int i=0; i<num_inputs;i++){
+            printf("Average  time taken %s from %d trials\n", inputs[i], num_trials);
+            for (int j = 0; j < 4; j++){
+                double avg = 0.0;
+                for (int trial=0; trial < num_trials; trial++){
+                    avg += times[trial][i][j];
+                }
+                avg /= num_inputs;
+                
+                printf("%-30s: %f seconds\n", 
+                    j==0 ? "Normal Scan" : 
+                    j==1 ? "Zone Map" : 
+                    j==2 ? "Shared Scan" : 
+                    j==3 ? "Zone Map + Shared Scan" : 
+                    "Undefined scan method", 
+                    avg);
+            }
+            printf("\n");
         }
-        avg /= num_inputs;
-        printf("Average time taken for scan type %s: %f seconds\n", j==0? "Normal Scan": j==1? "Zone Map": j==2? "Scared Scan": j==3? "Zone Map + Scared Scan": "Undefined scan method", avg);   
-    }
 
     for (int i = 0; i < num_inputs; i++) {
         free(times[i]);

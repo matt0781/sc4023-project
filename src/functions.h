@@ -20,6 +20,7 @@ typedef struct {
     int resale_price[MAX_NUM_RECORDS];
 } Buffer;
 
+
 typedef struct {
     // Partitions level attribute 
     // Note that we assume a partition can always hold 1000 records regardless of the datatype
@@ -35,10 +36,6 @@ typedef struct {
 
 
 } ColumnMetaData;
-
-
-
-
 
 
 // ----------------------------- FUNCTION DECLARATIONS -----------------------------

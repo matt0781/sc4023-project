@@ -15,7 +15,7 @@
 
 
 // Function that takes scan type as input
-DynamicArrayInt* filter_scan(ScanType scan_type, char* matric_num, int total_num_records, ColumnMetaData* columnMetaData) {
+DynamicArrayInt* filter_scan(Optimizer optimizer, char* matric_num, int total_num_records, ColumnMetaData* columnMetaData) {
 
     int year =  (matric_num[7]-'0') <= 3 ? 2020 + (matric_num[7]-'0') : 2010 + (matric_num[7]-'0') ; // year 20xx
     int month = matric_num[6] == '0' ? 10: (matric_num[6]-'0'); // starting month 
@@ -36,58 +36,42 @@ DynamicArrayInt* filter_scan(ScanType scan_type, char* matric_num, int total_num
     DynamicArrayInt *output_lines; 
 
 
-    switch (scan_type) {
-        case NORMAL_SCAN:
+    if ((optimizer == NORMAL) || (optimizer == SHARED_SCAN)) {
 
-            output_lines = get_lines_column("year", input_lines, total_num_records,  year); 
-            output_lines = get_lines_column("month", output_lines->array,output_lines->size, month);
-            output_lines = get_lines_column("town", output_lines->array, output_lines->size,  town); 
-            output_lines = get_lines_column("floor_area_sqm", output_lines->array, output_lines->size, area);
-            break;
-            
-        case ZONE_MAP_SCAN:{
-            // Zone map scan implementation
-            int total_num_blocks = columnMetaData[0].num_partitions; // this is the number of partitions (block) for the year column. This number is same for year,month,area columns because we standardize it, they have the same record size (4bytes int).
-            int *valid_blocks = (int*)malloc(sizeof(int)*total_num_blocks);
-            int count_valid_block = 0;
-
-            int* years_min = columnMetaData[0].min_values;
-            int* years_max = columnMetaData[0].max_values;
-            int* months_min = columnMetaData[1].min_values;
-            int* months_max = columnMetaData[1].max_values;
-            int* areas_min = columnMetaData[7].min_values;
-            int* areas_max = columnMetaData[7].max_values;
-
-            for (int i=0; i<total_num_blocks; i++){
-                if ((year < years_min[i]) | (year > years_max[i])) continue;
-                if ((month + 1 < months_min[i]) | (month > months_max[i])) continue;
-                if (area > areas_max[i]) continue;
-                valid_blocks[count_valid_block] = i;
-                count_valid_block ++;
-            }
-
-            output_lines = get_lines_column_zone_map("year", input_lines, total_num_records,  year, valid_blocks, count_valid_block); 
-            output_lines = get_lines_column_zone_map("month", output_lines->array,output_lines->size, month, valid_blocks, count_valid_block);
-            output_lines = get_lines_column_zone_map("town", output_lines->array, output_lines->size,  town, valid_blocks, count_valid_block); 
-            output_lines = get_lines_column_zone_map("floor_area_sqm", output_lines->array, output_lines->size, area, valid_blocks, count_valid_block);
-            break;
-        }
-        case SHARED_SCAN:
-            printf("Performing shared scan\n");
-            // Shared scan implementation
-            break;
-            
-        case ZONE_MAP_SHARED_SCAN:
-            printf("Performing zone map + shared scan\n");
-            // Combined zone map and shared scan implementation
-            break;
-            
-        default:
-            printf("Unknown scan type\n");
-            break;
+        output_lines = get_lines_column("year", input_lines, total_num_records,  year); 
+        output_lines = get_lines_column("month", output_lines->array,output_lines->size, month);
+        output_lines = get_lines_column("town", output_lines->array, output_lines->size,  town); 
+        output_lines = get_lines_column("floor_area_sqm", output_lines->array, output_lines->size, area);
     }
 
+    else if ((optimizer == ZONE_MAP) || (optimizer == ZONE_MAP_SHARED_SCAN)){
+         // Zone map scan implementation
+         int total_num_blocks = columnMetaData[0].num_partitions; // this is the number of partitions (block) for the year column. This number is same for year,month,area columns because we standardize it, they have the same record size (4bytes int).
+         int *valid_blocks = (int*)malloc(sizeof(int)*total_num_blocks);
+         int count_valid_block = 0;
 
+         int* years_min = columnMetaData[0].min_values;
+         int* years_max = columnMetaData[0].max_values;
+         int* months_min = columnMetaData[1].min_values;
+         int* months_max = columnMetaData[1].max_values;
+         int* areas_min = columnMetaData[7].min_values;
+         int* areas_max = columnMetaData[7].max_values;
+
+         for (int i=0; i<total_num_blocks; i++){
+             if ((year < years_min[i]) | (year > years_max[i])) continue;
+             if ((month + 1 < months_min[i]) | (month > months_max[i])) continue;
+             if (area > areas_max[i]) continue;
+             valid_blocks[count_valid_block] = i;
+             count_valid_block ++;
+         }
+
+         output_lines = get_lines_column_zone_map("year", input_lines, total_num_records,  year, valid_blocks, count_valid_block); 
+         output_lines = get_lines_column_zone_map("month", output_lines->array,output_lines->size, month, valid_blocks, count_valid_block);
+         output_lines = get_lines_column_zone_map("town", output_lines->array, output_lines->size,  town, valid_blocks, count_valid_block); 
+         output_lines = get_lines_column_zone_map("floor_area_sqm", output_lines->array, output_lines->size, area, valid_blocks, count_valid_block);
+
+    }
+            
 
     return output_lines;
 
@@ -159,8 +143,6 @@ DynamicArrayInt* get_lines_column(char* column_name, int* input_lines, int num_i
 
     return output_lines_;
 }
-
-
 
 
 
