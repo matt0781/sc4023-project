@@ -9,16 +9,27 @@ typedef struct {
     int year[MAX_NUM_RECORDS];
     int month[MAX_NUM_RECORDS];
     int town[MAX_NUM_RECORDS];
-    char flat_type[MAX_NUM_RECORDS][20];
-    char block[MAX_NUM_RECORDS][4];
-    char street_name[MAX_NUM_RECORDS][30];
+    int flat_type[MAX_NUM_RECORDS];
+    int block[MAX_NUM_RECORDS];
+    int street_name[MAX_NUM_RECORDS];
 
-    char storey_range[MAX_NUM_RECORDS][20];
+    char storey_range[MAX_NUM_RECORDS];
     int floor_area_sqm[MAX_NUM_RECORDS];
-    char flat_model[MAX_NUM_RECORDS][30];
+    int flat_model[MAX_NUM_RECORDS];
     int lease_commence_date[MAX_NUM_RECORDS];
     int resale_price[MAX_NUM_RECORDS];
 } Buffer;
+
+
+
+
+
+typedef struct {
+    char** map;
+    int max_count;
+    int count;
+   
+} CompressionMap;
 
 
 typedef struct {
@@ -52,5 +63,7 @@ void create_metadata(Buffer *buffer, ColumnMetaData *columnMetaData, int num_rec
 int get_digit_by_town(const char* town_name);
 int get_column_id_by_name(char* column_name);
 
+int get_compression_key(CompressionMap* compression_map, char* compression_val);
+void save_compression_map(CompressionMap* compression_map, char* filename);
 
 #endif  // End of include guard

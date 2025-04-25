@@ -9,6 +9,7 @@
 
 
 
+
 ColumnMetaData* storeColumnOrientedData(char *inputCsvFile, int total_num_records) {
     FILE *csv = fopen(inputCsvFile, "r");
     if (!csv) {
@@ -34,6 +35,32 @@ ColumnMetaData* storeColumnOrientedData(char *inputCsvFile, int total_num_record
         fprintf(stderr, "Memory allocation failed\n");
         return NULL;
     }
+    
+    // Compression that convert string to const.c file
+    // note that the compression for town is hard-coded in const.h
+    CompressionMap *compression_flat_type = (CompressionMap*)malloc(sizeof(CompressionMap*));
+    CompressionMap *compression_block = (CompressionMap*)malloc(sizeof(CompressionMap*));
+    CompressionMap *compression_street_name = (CompressionMap*)malloc(sizeof(CompressionMap*));
+    CompressionMap *compression_storey_range = (CompressionMap*)malloc(sizeof(CompressionMap*));
+    CompressionMap *compression_flat_model = (CompressionMap*)malloc(sizeof(CompressionMap*));
+
+
+    // Set the max_count and count
+    compression_flat_type->max_count = 30; compression_flat_type->count = 0;
+    compression_block->max_count = 3000; compression_block->count = 0;
+    compression_street_name->max_count = 1000; compression_street_name->count = 0;
+    compression_storey_range->max_count = 50; compression_storey_range->count = 0;
+    compression_flat_model->max_count = 50; compression_flat_model->count = 0;
+
+
+    // Allocate memory for the string pointer arrays
+    compression_flat_type->map = (char**)malloc(compression_flat_type->max_count * sizeof(char*));
+    compression_block->map = (char**)malloc(compression_block->max_count * sizeof(char*));
+    compression_street_name->map = (char**)malloc(compression_street_name->max_count * sizeof(char*));
+    compression_storey_range->map = (char**)malloc(compression_storey_range->max_count * sizeof(char*));
+    compression_flat_model->map = (char**)malloc(compression_flat_model->max_count * sizeof(char*));
+
+
 
     while (count < total_num_records){
         if (fgets(line, 1024, csv)){
@@ -50,13 +77,12 @@ ColumnMetaData* storeColumnOrientedData(char *inputCsvFile, int total_num_record
             buffer->year[count] = atoi(year_str);
             buffer->month[count] = atoi(month_str);
             buffer->town[count] = get_digit_by_town(fields[1]);
-            strncpy(buffer->flat_type[count], fields[2], FLAT_TYPE_SIZE);
-            strncpy(buffer->block[count], fields[3], BLOCK_ATTR_SIZE);
-            strncpy(buffer->street_name[count], fields[4], STREET_NAME_SIZE);
-            strncpy(buffer->storey_range[count], fields[5], STOREY_RANGE_SIZE);
-
+            buffer->flat_type[count] = get_compression_key(compression_flat_type, fields[2]);
+            buffer->block[count] = get_compression_key(compression_block, fields[3]);
+            buffer->street_name[count] = get_compression_key(compression_street_name, fields[4]);
+            buffer->storey_range[count] = get_compression_key(compression_storey_range, fields[5]);
+            buffer->flat_model[count] = get_compression_key(compression_flat_model, fields[7]);
             buffer->floor_area_sqm[count] = atoi(fields[6]);
-            strncpy(buffer->flat_model[count], fields[7], FLAT_MODEL_SIZE);
             buffer->lease_commence_date[count] = atoi(fields[8]);
             buffer->resale_price[count] = atoi(fields[9]);
 
@@ -65,7 +91,17 @@ ColumnMetaData* storeColumnOrientedData(char *inputCsvFile, int total_num_record
         }
     }
 
+    // save_compression_map the data into db
     save_buffer_to_binary_files(buffer, count);
+
+    // save the compression map into db
+    save_compression_map(compression_flat_type, "flat_type");
+    save_compression_map(compression_block, "block");
+    save_compression_map(compression_street_name, "street_name");
+    save_compression_map(compression_storey_range, "storey_range");
+    save_compression_map(compression_flat_model, "flat_model");
+
+
 
     ColumnMetaData* columnsMetaData = malloc(11 * sizeof(ColumnMetaData));
 
@@ -77,6 +113,9 @@ ColumnMetaData* storeColumnOrientedData(char *inputCsvFile, int total_num_record
 
     return columnsMetaData;
 }
+
+
+
 
 
 void create_metadata(Buffer *buffer, ColumnMetaData *columnMetaData, int num_records, int column_num){
@@ -191,7 +230,7 @@ void save_buffer_to_binary_files(Buffer* buffer, int num_records) {
     // Save flat_type data
     fp = fopen("./../database/flat_type.bin", "wb");
     if (fp != NULL) {
-        fwrite(buffer->flat_type, FLAT_TYPE_SIZE * 20, num_records, fp);
+        fwrite(buffer->flat_type, FLAT_TYPE_SIZE, num_records, fp);
         fclose(fp);
     }
     
@@ -268,4 +307,75 @@ int get_column_id_by_name(char* column_name) {
         }
     }
     return -1;
+}
+
+
+
+
+void save_compression_map(CompressionMap* compression_map, char* filename) {
+    if (compression_map == NULL || compression_map->map == NULL || filename == NULL) {
+        printf("ERROR: NULL pointer detected\n");
+        return;
+    }
+
+    #ifdef _WIN32
+        // Windows
+        if (system("if not exist .\\..\\database mkdir .\\database") != 0) {
+            printf("Failed to create database directory\n");
+        }
+    #else
+        // Unix/Linux/macOS
+        if (system("mkdir -p ./../database") != 0) {
+            printf("Failed to create database directory\n");
+        }
+    #endif
+    
+    char filename_[100];
+    sprintf(filename_, "./../database/compression_map_%s.txt", filename);
+
+    // Open file in write mode, not read mode
+    FILE *file = fopen(filename_, "w");
+    if (!file) {
+        printf("Error: Cannot open file %s for writing\n", filename_);
+        return;
+    }
+    
+    int count = compression_map->count;
+    
+    // Write each entry in text format
+    for (int i = 0; i < count; i++) {
+        if (compression_map->map[i] != NULL) {
+            // Write in format: "index value"
+            fprintf(file, "%d %s\n", i, compression_map->map[i]);
+        } else {
+            // Handle NULL entries
+            fprintf(file, "%d NULL\n", i);
+        }
+    }
+    
+    fclose(file);
+
+}
+
+int get_compression_key(CompressionMap* compression_map, char* compression_val){
+    if (compression_map->map == NULL) {
+        return -1;  
+    }
+    int count = compression_map->count;
+
+    if (count == 0){
+        compression_map->map[0] = strdup(compression_val);
+        compression_map->count ++;
+        return 0;
+    }
+
+    for (int i=0; i< count; i++){
+        if (strcmp(compression_map->map[i], compression_val) == 0){            
+            return i;
+        }
+    }
+
+    compression_map->map[count] = strdup(compression_val);
+    compression_map->count++;
+    return count;
 }

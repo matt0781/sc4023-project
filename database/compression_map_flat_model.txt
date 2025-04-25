@@ -1,0 +1,21 @@
+0 Improved
+1 New Generation
+2 Model A
+3 Simplified
+4 Premium Apartment
+5 Standard
+6 Model A-Maisonette
+7 Apartment
+8 Maisonette
+9 Model A2
+10 Terrace
+11 Adjoined flat
+12 DBSS
+13 Multi Generation
+14 Premium Maisonette
+15 Improved-Maisonette
+16 Type S1
+17 Type S2
+18 Premium Apartment Loft
+19 2-room
+20 3Gen

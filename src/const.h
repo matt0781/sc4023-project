@@ -6,18 +6,20 @@
 #define TOTAL_NUM_RECORDS 222833
 #define RECORDS_PER_PARTITION 1000
 #define MAX_NUM_PARTITON 300
+#define MAX_NUM_UNIQUE_VAL 3000
+#define BLOCK_SIZE 4000
 
 // metadata - size of each attribute
 #define YEAR_SIZE sizeof(int)
 #define MONTH_SIZE sizeof(int)
 #define TOWN_SIZE sizeof(int)
-#define FLAT_TYPE_SIZE 20
-#define BLOCK_ATTR_SIZE 4
-#define STREET_NAME_SIZE 30
+#define FLAT_TYPE_SIZE sizeof(int)
+#define BLOCK_ATTR_SIZE sizeof(int)
+#define STREET_NAME_SIZE sizeof(int)
 
-#define STOREY_RANGE_SIZE 7
+#define STOREY_RANGE_SIZE sizeof(int)
 #define FLOOR_AREA_SQM_SIZE sizeof(int)
-#define FLAT_MODEL_SIZE 30
+#define FLAT_MODEL_SIZE sizeof(int)
 #define LEASE_COMMENCE_DATE_SIZE sizeof(int)
 #define RESALE_PRICE_SIZE sizeof(int)
 
