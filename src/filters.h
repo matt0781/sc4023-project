@@ -2,7 +2,7 @@
 #define FILTERS_H
 
 #include "utils.h"
-#include "functions.h"
+#include "load_db.h"
 
 
 DynamicArrayInt* filter_scan(Optimizer scan_type, char* matric_num, int total_num_records, ColumnMetaData* columnMetaData);

@@ -44,6 +44,7 @@ extern const int is_int_column[11];
 extern const char* column_name_mapping[11];
 extern const char* town_mapping[26];
 
+
 /* types of optimizer */
 typedef enum {
     NORMAL = 0,      // Normal scan
@@ -51,8 +52,6 @@ typedef enum {
     SHARED_SCAN = 2,      // Shared scan
     ZONE_MAP_SHARED_SCAN = 3  // Zone map + shared scan
 } Optimizer;
-
-
 
 
 #endif /* CONST_H */

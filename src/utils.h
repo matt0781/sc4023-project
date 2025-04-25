@@ -2,7 +2,7 @@
 #define UTILS_H
 
 #include "compute.h"
-#include "functions.h"
+#include "load_db.h"
 typedef struct  {
     int* array;
     int size;

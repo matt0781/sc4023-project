@@ -8,7 +8,7 @@
 #include "filters.h"
 #include "utils.h"
 #include "disk_io.h"
-#include "functions.h"
+#include "load_db.h"
 
 
 
@@ -99,7 +99,7 @@ DynamicArrayInt* get_lines_column(char* column_name, int* input_lines, int num_i
 
         // load a new block data
         if (block_num > last_block_num){
-            arr = get_IO_partition_int(block_num,  record_size, column_name);
+            arr = get_IO_int(block_num,  record_size, column_name);
         }
 
         // while still needing to access the same block
@@ -164,7 +164,7 @@ int* get_values_column(char* column_name, int* input_lines, int num_input_lines)
 
         // load a new block data
         if (block_num > last_block_num){
-            arr = get_IO_partition_int(block_num,  record_size, column_name);
+            arr = get_IO_int(block_num,  record_size, column_name);
         }
 
         // while still needing to access the same block
@@ -210,7 +210,7 @@ DynamicArrayInt* get_lines_column_zone_map(char* column_name, int* input_lines, 
 
         // load a new block data
         if (block_num > last_block_num){
-            arr = get_IO_partition_int(block_num,  record_size, column_name);
+            arr = get_IO_int(block_num,  record_size, column_name);
         }
 
         // while still needing to access the same block

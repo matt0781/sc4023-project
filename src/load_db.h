@@ -22,8 +22,6 @@ typedef struct {
 
 
 
-
-
 typedef struct {
     char** map;
     int max_count;
