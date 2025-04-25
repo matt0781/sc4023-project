@@ -13,9 +13,16 @@ Follow these simple steps to compile and run the program:
 `cd src`
 
 3. Compile all C files:
-`gcc -o program ./*c`
+For Windows:
+`gcc -o program.exe *.c` 
+For Mac:
+`gcc -o program *.c`
 
 4. Run the compiled program:
+For Windows:
+`./program.exe` 
+For Mac:
 `./program`
+
 
 The program results will be stored in the ScanResult folder.
