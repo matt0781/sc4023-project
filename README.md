@@ -9,20 +9,28 @@ Follow these simple steps to compile and run the program:
 1. Change to the project directory:
 `cd SC4023-project`
 
-2. Navigate to the source code directory:
+3. Navigate to the source code directory:
 `cd src`
 
-3. Compile all C files:
-For Windows:
-`gcc -o program.exe *.c` 
-For Mac:
-`gcc -o program *.c`
+5. Compile all C files:
+   
+      For Windows:
+      `gcc -o program.exe *.c` 
+      
+      For Mac:
+      `gcc -o program *.c`
 
-4. Run the compiled program:
-For Windows:
-`./program.exe` 
-For Mac:
-`./program`
+6. Run the compiled program:
+   
+      For Windows:
+      `./program.exe` 
+      
+      For Mac:
+      `./program`
+
+## How to test with different inputs
+Go to `src/main.c`
+In main function, change the `inputs` (matric numbers) and `num_inputs` variables.
 
 
-The program results will be stored in the ScanResult folder.
+The program results will be stored in the ScanResults folder.
